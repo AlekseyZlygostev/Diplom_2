@@ -1,4 +1,4 @@
-package apiTestScenarios;
+package apitestscenarios;
 
 import com.github.javafaker.Faker;
 import io.qameta.allure.Step;
@@ -7,23 +7,18 @@ import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import serialsClasses.ApiEndPoints;
-import serialsClasses.UserSerials;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import serialsclasses.ApiEndPoints;
+import serialsclasses.UserSerials;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class CreateOrderWithPostApiOrdersTest {
-
+public class ChangeUserWithPatchApiAuthUserTest {
     UserSerials user;
     ApiEndPoints api = new ApiEndPoints();
     String email;
     String password;
     String name;
-    List<String> ingredients;
     Response response;
     String token = "";
 
@@ -50,9 +45,9 @@ public class CreateOrderWithPostApiOrdersTest {
         return response;
     }
 
-    @Step("Send POST order request")
-    public Response sendPostOrderRequest(String token, List<String> ingredients){
-        user = new UserSerials(ingredients);
+    @Step("Send PATCH request")
+    public Response sendPatchRequest(String token, String email, String password, String name){
+        user = new UserSerials(email, password, name);
 
         response = given()
                 .header("Content-type", "application/json")
@@ -60,7 +55,7 @@ public class CreateOrderWithPostApiOrdersTest {
                 .and()
                 .body(user)
                 .when()
-                .post(api.getCreateOrder());
+                .patch(api.getChangeUser());
         return response;
     }
 
@@ -72,46 +67,28 @@ public class CreateOrderWithPostApiOrdersTest {
                 .statusLine(containsString(status));
     }
 
-    @Step ("Check Status")
-    public void checkStatus(Response response, String status){
-        response.then().assertThat()
-                .statusLine(containsString(status));
-    }
-
     @Step ("Get Token")
     public String getToken(Response response) {
         return response.then().extract().body().path("accessToken");
     }
 
     @Test
-    public void canCreateOrderWithAuthorisation(){
-        ingredients = new ArrayList<>();
-        ingredients.add("61c0c5a71d1f82001bdaaa6d");
-        ingredients.add("61c0c5a71d1f82001bdaaa6f");
-        response = sendPostOrderRequest(token, ingredients);
+    public void canChangeUserWithAuthorisation(){
+        response = sendPatchRequest(token,email + "ru", password + "123", name + "s");
         checkStatus (response, true, "200 OK");
     }
 
     @Test
-    public void canCreateOrderWithoutAuthorisation(){
-        ingredients = new ArrayList<>();
-        ingredients.add("61c0c5a71d1f82001bdaaa6d");
-        ingredients.add("61c0c5a71d1f82001bdaaa6f");
-        response = sendPostOrderRequest("", ingredients);
-        checkStatus (response, true, "200 OK");
+    public void cannotChangeUserWithoutAuthorisation(){
+        response = sendPatchRequest("", email + "ru", password + "123", name + "s");
+        checkStatus (response, false,"401 Unauthorized");
     }
 
     @Test
-    public void cannotCreateOrderWithoutIngredients(){
-        response = sendPostOrderRequest(token, Collections.singletonList("1234567890"));
-        checkStatus (response, "500 Internal Server Error");
-    }
-
-    @Test
-    public void cannotCreateOrderWithWrongIngredientsHash(){
-        ingredients = new ArrayList<>();
-        response = sendPostOrderRequest("", ingredients);
-        checkStatus (response, false, "400 Bad Request");
+    public void cannotChangeUserWithExistEmail(){
+        sendRequest(name + email, password, name);
+        response = sendPatchRequest(token,name + email, password, name);
+        checkStatus (response, false,"403 Forbidden");
     }
 
     @After

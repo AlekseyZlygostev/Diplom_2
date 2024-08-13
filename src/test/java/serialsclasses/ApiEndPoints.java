@@ -1,4 +1,4 @@
-package serialsClasses;
+package serialsclasses;
 
 public class ApiEndPoints {
     private String createUser;

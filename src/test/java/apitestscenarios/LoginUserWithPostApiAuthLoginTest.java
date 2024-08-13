@@ -1,4 +1,4 @@
-package apiTestScenarios;
+package apitestscenarios;
 
 import com.github.javafaker.Faker;
 import io.qameta.allure.Step;
@@ -7,13 +7,14 @@ import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import serialsClasses.ApiEndPoints;
-import serialsClasses.UserSerials;
+import serialsclasses.ApiEndPoints;
+import serialsclasses.UserSerials;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class CreateUserWithPostApiAuthRegisterTest {
+public class LoginUserWithPostApiAuthLoginTest {
     UserSerials user;
     ApiEndPoints api = new ApiEndPoints();
     String email;
@@ -29,9 +30,10 @@ public class CreateUserWithPostApiAuthRegisterTest {
         password = faker.internet().password();
         name = faker.name().firstName();
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
+        response = sendRequest(email, password, name);
     }
 
-    @Step ("Send POST request")
+    @Step("Send POST request /api/auth/register")
     public Response sendRequest(String email, String password, String name){
         user = new UserSerials(email, password, name);
         response = given()
@@ -39,6 +41,17 @@ public class CreateUserWithPostApiAuthRegisterTest {
                 .body(user)
                 .when()
                 .post(api.getCreateUser());
+        return response;
+    }
+
+    @Step("Send POST request /api/auth/login")
+    public Response sendLoginRequest(String email, String password){
+        user = new UserSerials(email, password);
+        response = given()
+                .header("Content-type", "application/json")
+                .body(user)
+                .when()
+                .post(api.getLoginUser());
         return response;
     }
 
@@ -56,52 +69,35 @@ public class CreateUserWithPostApiAuthRegisterTest {
     }
 
     @Test
-    public void canCreateUser(){
-        response = sendRequest(email, password, name);
+    public void canLoginExistUser(){
+        response = sendLoginRequest(email, password);
 
         checkStatus (response, true, "200 OK");
     }
 
     @Test
-    public void cannotCreateTwoIdenticalUsers(){
-        response = sendRequest(email, password, name);
-        Response response1 = sendRequest(email, password, name);
+    public void cannotLoginUserWithWrongEmail(){
+        response = sendLoginRequest(email + "ru", password);
 
-        checkStatus (response1, false, "403 Forbidden");
-
+        checkStatus (response, false, "401 Unauthorized");
     }
 
     @Test
-    public void cannotCreateUserWithoutEmail(){
-        response = sendRequest("", password, name);
+    public void cannotLoginUserWithWrongPassword(){
+        response = sendLoginRequest(email, password + "123");
 
-        checkStatus (response, false, "403 Forbidden");
-    }
-
-    @Test
-    public void cannotCreateUserWithoutPassword(){
-        response = sendRequest(email, "", name);
-
-        checkStatus (response, false,"403 Forbidden");
-    }
-
-    @Test
-    public void cannotCreateUserWithoutName(){
-        response = sendRequest(email, password, "");
-
-        checkStatus (response, false,"403 Forbidden");
+        checkStatus (response, false, "401 Unauthorized");
     }
 
     @After
     public void clearAll(){
         try {
             token = getToken(response).replaceFirst("Bearer ", "");
-            given()
+            response = given()
                     .auth().oauth2(token)
                     .delete(api.getChangeUser());
         } catch (Exception exception) {
             token = "";
         }
     }
-
 }

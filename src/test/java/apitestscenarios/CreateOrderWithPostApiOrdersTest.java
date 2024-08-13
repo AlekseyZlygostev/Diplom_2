@@ -1,4 +1,4 @@
-package apiTestScenarios;
+package apitestscenarios;
 
 import com.github.javafaker.Faker;
 import io.qameta.allure.Step;
@@ -7,23 +7,23 @@ import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import serialsClasses.ApiEndPoints;
-import serialsClasses.UserSerials;
+import serialsclasses.ApiEndPoints;
+import serialsclasses.UserSerials;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class GetUsersOrdersWithGetApiOrdersTest {
+public class CreateOrderWithPostApiOrdersTest {
 
     UserSerials user;
     ApiEndPoints api = new ApiEndPoints();
     String email;
     String password;
     String name;
-    List<String> ingredients = new ArrayList<>();
+    List<String> ingredients;
     Response response;
     String token = "";
 
@@ -33,12 +33,9 @@ public class GetUsersOrdersWithGetApiOrdersTest {
         email = faker.internet().emailAddress();
         password = faker.internet().password();
         name = faker.name().firstName();
-        ingredients.add("61c0c5a71d1f82001bdaaa6d");
-        ingredients.add("61c0c5a71d1f82001bdaaa6f");
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
         response = sendRequest(email, password, name);
         token = getToken(response).replaceFirst("Bearer ", "");
-        sendPostOrderRequest(token, ingredients);
     }
 
     @Step("Send POST request")
@@ -67,20 +64,17 @@ public class GetUsersOrdersWithGetApiOrdersTest {
         return response;
     }
 
-    @Step("Send GET order request")
-    public Response sendGetOrderRequest(String token){
-        response = given()
-                .header("Content-type", "application/json")
-                .auth().oauth2(token)
-                .get(api.getCreateOrder());
-        return response;
-    }
-
     @Step ("Check Status")
     public void checkStatus(Response response, boolean responseBody, String status){
         response.then().assertThat()
                 .body("success", equalTo(responseBody))
                 .and()
+                .statusLine(containsString(status));
+    }
+
+    @Step ("Check Status")
+    public void checkStatus(Response response, String status){
+        response.then().assertThat()
                 .statusLine(containsString(status));
     }
 
@@ -90,15 +84,34 @@ public class GetUsersOrdersWithGetApiOrdersTest {
     }
 
     @Test
-    public void canGetOrdersWithAuthUser(){
-        response = sendGetOrderRequest(token);
+    public void canCreateOrderWithAuthorisation(){
+        ingredients = new ArrayList<>();
+        ingredients.add("61c0c5a71d1f82001bdaaa6d");
+        ingredients.add("61c0c5a71d1f82001bdaaa6f");
+        response = sendPostOrderRequest(token, ingredients);
         checkStatus (response, true, "200 OK");
     }
 
     @Test
-    public void cannotGetOrdersWithoutAuthUser(){
-        response = sendGetOrderRequest("");
-        checkStatus (response, false, "401 Unauthorized");
+    public void canCreateOrderWithoutAuthorisation(){
+        ingredients = new ArrayList<>();
+        ingredients.add("61c0c5a71d1f82001bdaaa6d");
+        ingredients.add("61c0c5a71d1f82001bdaaa6f");
+        response = sendPostOrderRequest("", ingredients);
+        checkStatus (response, true, "200 OK");
+    }
+
+    @Test
+    public void cannotCreateOrderWithoutIngredients(){
+        response = sendPostOrderRequest(token, Collections.singletonList("1234567890"));
+        checkStatus (response, "500 Internal Server Error");
+    }
+
+    @Test
+    public void cannotCreateOrderWithWrongIngredientsHash(){
+        ingredients = new ArrayList<>();
+        response = sendPostOrderRequest("", ingredients);
+        checkStatus (response, false, "400 Bad Request");
     }
 
     @After
