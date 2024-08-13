@@ -13,7 +13,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class ChangeUserWithPatchApiAuthUser {
+public class ChangeUserWithPatchApiAuthUserTest {
     UserSerials user;
     ApiEndPoints api = new ApiEndPoints();
     String email;

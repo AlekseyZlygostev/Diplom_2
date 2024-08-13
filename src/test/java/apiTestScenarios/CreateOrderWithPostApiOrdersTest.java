@@ -16,7 +16,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class CreateOrderWithPostApiOrders {
+public class CreateOrderWithPostApiOrdersTest {
 
     UserSerials user;
     ApiEndPoints api = new ApiEndPoints();
