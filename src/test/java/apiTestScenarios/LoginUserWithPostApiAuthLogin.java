@@ -12,6 +12,7 @@ import serialsClasses.UserSerials;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 
 public class LoginUserWithPostApiAuthLogin {
     UserSerials user;
@@ -55,8 +56,10 @@ public class LoginUserWithPostApiAuthLogin {
     }
 
     @Step ("Check Status")
-    public void checkStatus(Response response, String status){
+    public void checkStatus(Response response, boolean responseBody, String status){
         response.then().assertThat()
+                .body("success", equalTo(responseBody))
+                .and()
                 .statusLine(containsString(status));
     }
 
@@ -69,21 +72,21 @@ public class LoginUserWithPostApiAuthLogin {
     public void canLoginExistUser(){
         response = sendLoginRequest(email, password);
 
-        checkStatus (response, "200 OK");
+        checkStatus (response, true, "200 OK");
     }
 
     @Test
     public void cannotLoginUserWithWrongEmail(){
         response = sendLoginRequest(email + "ru", password);
 
-        checkStatus (response, "401 Unauthorized");
+        checkStatus (response, false, "401 Unauthorized");
     }
 
     @Test
     public void cannotLoginUserWithWrongPassword(){
         response = sendLoginRequest(email, password + "123");
 
-        checkStatus (response, "401 Unauthorized");
+        checkStatus (response, false, "401 Unauthorized");
     }
 
     @After

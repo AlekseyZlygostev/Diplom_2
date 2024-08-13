@@ -9,9 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 import serialsClasses.ApiEndPoints;
 import serialsClasses.UserSerials;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 
 public class ChangeUserWithPatchApiAuthUser {
     UserSerials user;
@@ -60,8 +60,10 @@ public class ChangeUserWithPatchApiAuthUser {
     }
 
     @Step ("Check Status")
-    public void checkStatus(Response response, String status){
+    public void checkStatus(Response response, boolean responseBody, String status){
         response.then().assertThat()
+                .body("success", equalTo(responseBody))
+                .and()
                 .statusLine(containsString(status));
     }
 
@@ -73,20 +75,20 @@ public class ChangeUserWithPatchApiAuthUser {
     @Test
     public void canChangeUserWithAuthorisation(){
         response = sendPatchRequest(token,email + "ru", password + "123", name + "s");
-        checkStatus (response, "200 OK");
+        checkStatus (response, true, "200 OK");
     }
 
     @Test
     public void cannotChangeUserWithoutAuthorisation(){
         response = sendPatchRequest("", email + "ru", password + "123", name + "s");
-        checkStatus (response, "401 Unauthorized");
+        checkStatus (response, false,"401 Unauthorized");
     }
 
     @Test
     public void cannotChangeUserWithExistEmail(){
         sendRequest(name + email, password, name);
         response = sendPatchRequest(token,name + email, password, name);
-        checkStatus (response, "403 Forbidden");
+        checkStatus (response, false,"403 Forbidden");
     }
 
     @After

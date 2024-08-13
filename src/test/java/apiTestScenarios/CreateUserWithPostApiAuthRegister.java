@@ -11,6 +11,7 @@ import serialsClasses.ApiEndPoints;
 import serialsClasses.UserSerials;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 
 public class CreateUserWithPostApiAuthRegister {
     UserSerials user;
@@ -42,8 +43,10 @@ public class CreateUserWithPostApiAuthRegister {
     }
 
     @Step ("Check Status")
-    public void checkStatus(Response response, String status){
+    public void checkStatus(Response response, boolean responseBody, String status){
         response.then().assertThat()
+                .body("success", equalTo(responseBody))
+                .and()
                 .statusLine(containsString(status));
     }
 
@@ -56,7 +59,7 @@ public class CreateUserWithPostApiAuthRegister {
     public void canCreateUser(){
         response = sendRequest(email, password, name);
 
-        checkStatus (response, "200 OK");
+        checkStatus (response, true, "200 OK");
     }
 
     @Test
@@ -64,7 +67,7 @@ public class CreateUserWithPostApiAuthRegister {
         response = sendRequest(email, password, name);
         Response response1 = sendRequest(email, password, name);
 
-        checkStatus (response1, "403 Forbidden");
+        checkStatus (response1, false, "403 Forbidden");
 
     }
 
@@ -72,21 +75,21 @@ public class CreateUserWithPostApiAuthRegister {
     public void cannotCreateUserWithoutEmail(){
         response = sendRequest("", password, name);
 
-        checkStatus (response, "403 Forbidden");
+        checkStatus (response, false, "403 Forbidden");
     }
 
     @Test
     public void cannotCreateUserWithoutPassword(){
         response = sendRequest(email, "", name);
 
-        checkStatus (response, "403 Forbidden");
+        checkStatus (response, false,"403 Forbidden");
     }
 
     @Test
     public void cannotCreateUserWithoutName(){
         response = sendRequest(email, password, "");
 
-        checkStatus (response, "403 Forbidden");
+        checkStatus (response, false,"403 Forbidden");
     }
 
     @After
