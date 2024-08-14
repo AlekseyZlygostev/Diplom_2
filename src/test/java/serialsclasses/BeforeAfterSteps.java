@@ -14,7 +14,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class AfterBeforeTests {
+public class BeforeAfterSteps {
     protected UserSerials user;
     protected ApiEndPoints api = new ApiEndPoints();
     protected String email;

@@ -1,9 +1,9 @@
 package apitestscenarios;
 
 import org.junit.Test;
-import serialsclasses.AfterBeforeTests;
+import serialsclasses.BeforeAfterSteps;
 
-public class GetUsersOrdersWithGetApiOrdersTest extends AfterBeforeTests {
+public class GetUsersOrdersWithGetApiOrdersTest extends BeforeAfterSteps {
 
     @Test
     public void canGetOrdersWithAuthUser(){

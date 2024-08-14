@@ -3,9 +3,9 @@ package apitestscenarios;
 
 import io.restassured.response.Response;
 import org.junit.Test;
-import serialsclasses.AfterBeforeTests;
+import serialsclasses.BeforeAfterSteps;
 
-public class CreateUserWithPostApiAuthRegisterTest extends AfterBeforeTests {
+public class CreateUserWithPostApiAuthRegisterTest extends BeforeAfterSteps {
 
     @Test
     public void canCreateUser(){

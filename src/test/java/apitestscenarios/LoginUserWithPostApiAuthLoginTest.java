@@ -1,9 +1,9 @@
 package apitestscenarios;
 
 import org.junit.Test;
-import serialsclasses.AfterBeforeTests;
+import serialsclasses.BeforeAfterSteps;
 
-public class LoginUserWithPostApiAuthLoginTest extends AfterBeforeTests {
+public class LoginUserWithPostApiAuthLoginTest extends BeforeAfterSteps {
 
     @Test
     public void canLoginExistUser(){

@@ -2,11 +2,11 @@ package apitestscenarios;
 
 
 import org.junit.Test;
-import serialsclasses.AfterBeforeTests;
+import serialsclasses.BeforeAfterSteps;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class CreateOrderWithPostApiOrdersTest extends AfterBeforeTests {
+public class CreateOrderWithPostApiOrdersTest extends BeforeAfterSteps {
 
     @Test
     public void canCreateOrderWithAuthorisation(){

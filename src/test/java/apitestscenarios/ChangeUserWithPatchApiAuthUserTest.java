@@ -2,10 +2,10 @@ package apitestscenarios;
 
 
 import org.junit.Test;
-import serialsclasses.AfterBeforeTests;
+import serialsclasses.BeforeAfterSteps;
 
 
-public class ChangeUserWithPatchApiAuthUserTest extends AfterBeforeTests {
+public class ChangeUserWithPatchApiAuthUserTest extends BeforeAfterSteps {
 
     @Test
     public void canChangeUserWithAuthorisation(){
