@@ -22,7 +22,6 @@ public class BeforeAfterSteps {
     protected String name;
     protected String logOutEmail;
     protected String logOutPassword;
-    protected String logOutName;
     protected List<String> ingredients = new ArrayList<>();
     protected Response response;
     protected String token = "";
